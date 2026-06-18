@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!-- saved from url=(0190)file:///C:/Users/SALTANAT/OneDrive/Desktop/%D0%9A%D0%BE%D0%B4%D1%8B%20%D0%B4%D0%BB%D1%8F%20%D1%83%D1%80%D0%BE%D0%BA%D0%B0/%D0%9E%D0%B1%D0%BB%D0%B0%D0%BA%D0%BE%20%D1%81%D0%BB%D0%BE%D0%B2.html -->
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Облако добра</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#e8f5e9,#f5f9ff);
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#2e7d32;
+}
+
+.subtitle{
+    text-align:center;
+    color:#555;
+    margin-bottom:30px;
+}
+
+.cloud{
+    text-align:center;
+    margin:30px 0;
+}
+
+.word{
+    display:inline-block;
+    margin:12px;
+    padding:12px 20px;
+    border-radius:25px;
+    cursor:pointer;
+    transition:0.3s;
+    background:#f1f8e9;
+    border:2px solid #81c784;
+}
+
+.word:hover{
+    transform:scale(1.1);
+}
+
+.selected{
+    background:#66bb6a;
+    color:white;
+}
+
+.big{font-size:36px;}
+.medium{font-size:28px;}
+.small{font-size:22px;}
+
+.questions{
+    margin-top:30px;
+}
+
+.question{
+    background:#f9fbe7;
+    padding:15px;
+    border-left:5px solid #66bb6a;
+    margin-bottom:20px;
+    border-radius:10px;
+}
+
+textarea{
+    width:100%;
+    height:90px;
+    margin-top:10px;
+    border-radius:10px;
+    padding:10px;
+    border:1px solid #ccc;
+}
+
+.result{
+    margin-top:20px;
+    font-size:18px;
+    color:#2e7d32;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>☁️ Облако добра</h1>
+
+<p class="subtitle">
+Выберите слова, которые, по вашему мнению, связаны с добром.
+</p>
+
+<div class="cloud">
+
+<span class="word big" onclick="selectWord(this)">Помощь</span>
+
+<span class="word medium selected" onclick="selectWord(this)">Забота</span>
+
+<span class="word big" onclick="selectWord(this)">Дружба</span>
+
+<span class="word medium" onclick="selectWord(this)">Ответственность</span>
+
+<span class="word big" onclick="selectWord(this)">Сострадание</span>
+
+<span class="word medium" onclick="selectWord(this)">Уважение</span>
+
+<span class="word small" onclick="selectWord(this)">Равнодушие</span>
+
+<span class="word small" onclick="selectWord(this)">Эгоизм</span>
+
+</div>
+
+<div id="selected" class="result">Выбранные слова: Забота</div>
+
+<div class="questions">
+
+<div class="question">
+<b>1. Что объединяет эти слова?</b>
+<textarea></textarea>
+</div>
+
+<div class="question">
+<b>2. Какие качества помогают делать добро?</b>
+<textarea></textarea>
+</div>
+
+<div class="question">
+<b>3. Всегда ли добро понимают правильно?</b>
+<textarea></textarea>
+</div>
+
+<div class="question">
+<b>4. Как эта тема раскрывается в повести А. Алексина «Безумная Евдокия»?</b>
+<textarea></textarea>
+</div>
+
+</div>
+
+</div>
+
+<script>
+function selectWord(word){
+    word.classList.toggle("selected");
+
+    let selectedWords = [];
+    document.querySelectorAll(".selected").forEach(item=>{
+        selectedWords.push(item.textContent);
+    });
+
+    document.getElementById("selected").innerHTML =
+    "Выбранные слова: " +
+    (selectedWords.length ? selectedWords.join(", ") : "—");
+}
+</script>
+
+
+</body></html>
