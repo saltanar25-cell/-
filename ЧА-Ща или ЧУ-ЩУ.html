@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ча-ща, чу-щу</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: linear-gradient(135deg, #1F4E79, #2E6BA8); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .game { background: #fff; border-radius: 20px; padding: 40px; max-width: 700px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  h1 { color: #1F4E79; text-align: center; margin-bottom: 20px; font-size: 32px; }
+  .score { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 18px; color: #666; }
+  .progress { height: 12px; background: #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 30px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #1F4E79, #ED7D31); transition: width 0.5s; }
+  .word { font-size: 48px; text-align: center; margin: 40px 0; font-weight: bold; color: #1F4E79; letter-spacing: 4px; }
+  .blank { color: #ED7D31; border-bottom: 4px solid #ED7D31; padding: 0 10px; }
+  .options { display: flex; gap: 30px; justify-content: center; margin: 30px 0; }
+  .option { padding: 25px 50px; font-size: 40px; font-weight: bold; background: #f0f0f0; border: 3px solid #ccc; border-radius: 15px; cursor: pointer; transition: 0.3s; }
+  .option:hover { background: #1F4E79; color: #fff; border-color: #1F4E79; transform: scale(1.05); }
+  .option.correct { background: #4CAF50; color: #fff; border-color: #4CAF50; }
+  .option.wrong { background: #f44336; color: #fff; border-color: #f44336; animation: shake 0.5s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  .feedback { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 40px; }
+</style>
+</head>
+<body>
+<div class="game">
+  <h1>🍵 Ча-ща, чу-щу</h1>
+  <div class="score">
+    <span>Правильно: <b id="score">0</b></span>
+    <span>Вопрос: <b id="current">1</b> / 10</span>
+  </div>
+  <div class="progress"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+  <div class="word" id="word"></div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<script src="game-common.js"></script>
+<script>
+const QUESTIONS = [
+  { word: "_ашка", options: ["ч", "ш"], answer: "ч", correct: "чашка" },
+  { word: "щ_ка", options: ["у", "ю"], answer: "у", correct: "щука" },
+  { word: "ро_а", options: ["щ", "ч"], answer: "щ", correct: "роща" },
+  { word: "_удо", options: ["ч", "ш"], answer: "ч", correct: "чудо" },
+  { word: "да_а", options: ["ч", "ш"], answer: "ч", correct: "дача" },
+  { word: "щ_вель", options: ["а", "я"], answer: "а", correct: "щавель" },
+  { word: "_улки", options: ["ч", "ш"], answer: "ч", correct: "чулки" },
+  { word: "пи_а", options: ["щ", "ч"], answer: "щ", correct: "пища" },
+  { word: "_айник", options: ["ч", "ш"], answer: "ч", correct: "чайник" },
+  { word: "щ_пальца", options: ["у", "ю"], answer: "у", correct: "щупальца" }
+];
+
+let current = 0, correct = 0, wrong = 0, startTime = Date.now();
+
+function render() {
+  if (current >= QUESTIONS.length) {
+    const time = Math.round((Date.now() - startTime) / 1000);
+    GAME_COMMON.showEndScreen(correct, wrong, time, 'cha-sha-chu-shu', () => {
+      current = 0; correct = 0; wrong = 0; startTime = Date.now();
+      render();
+    });
+    return;
+  }
+  const q = QUESTIONS[current];
+  document.getElementById('word').innerHTML = q.word.replace('_', '<span class="blank">?</span>');
+  document.getElementById('current').textContent = current + 1;
+  document.getElementById('progress').style.width = (current / QUESTIONS.length * 100) + '%';
+  document.getElementById('feedback').textContent = '';
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach(letter => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = letter.toUpperCase();
+    btn.onclick = () => check(btn, letter);
+    opts.appendChild(btn);
+  });
+}
+
+function check(btn, letter) {
+  document.querySelectorAll('.option').forEach(b => b.disabled = true);
+  const q = QUESTIONS[current];
+  if (letter === q.answer) {
+    btn.classList.add('correct');
+    correct++;
+    document.getElementById('score').textContent = correct;
+    document.getElementById('feedback').textContent = `✅ Верно! ${q.correct}`;
+    document.getElementById('feedback').style.color = '#4CAF50';
+  } else {
+    btn.classList.add('wrong');
+    wrong++;
+    document.getElementById('feedback').textContent = `❌ Правильно: ${q.correct}`;
+    document.getElementById('feedback').style.color = '#f44336';
+  }
+  setTimeout(() => { current++; render(); }, 1400);
+}
+
+render();
+</script>
+</body>
+</html>
