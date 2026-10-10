@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Собери предложение</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: linear-gradient(135deg, #1F4E79, #2E6BA8); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .game { background: #fff; border-radius: 20px; padding: 40px; max-width: 800px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  h1 { color: #1F4E79; text-align: center; margin-bottom: 20px; font-size: 32px; }
+  .score { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 18px; color: #666; }
+  .progress { height: 12px; background: #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 30px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #1F4E79, #ED7D31); transition: width 0.5s; }
+  .build-area { min-height: 80px; background: #f9f9f9; border: 3px dashed #1F4E79; border-radius: 12px; padding: 15px; margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .word-btn { padding: 12px 20px; font-size: 20px; background: #1F4E79; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+  .word-btn:hover { background: #ED7D31; transform: scale(1.05); }
+  .word-btn.used { opacity: 0.3; cursor: default; transform: none; }
+  .word-btn.in-answer { background: #ED7D31; }
+  .pool { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
+  .btn { display: block; margin: 20px auto; padding: 16px 40px; font-size: 20px; background: #1F4E79; color: #fff; border: none; border-radius: 12px; cursor: pointer; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .feedback { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 40px; }
+</style>
+</head>
+<body>
+<div class="game">
+  <h1>🧩 Собери предложение</h1>
+  <div class="score">
+    <span>Правильно: <b id="score">0</b></span>
+    <span>Вопрос: <b id="current">1</b> / 10</span>
+  </div>
+  <div class="progress"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+  <div class="build-area" id="buildArea"></div>
+  <div class="pool" id="pool"></div>
+  <button class="btn" id="checkBtn" onclick="check()" disabled>Проверить</button>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<script src="game-common.js"></script>
+<script>
+const QUESTIONS = [
+  { words: ["Наступила", "золотая", "осень."], correct: "Наступила золотая осень." },
+  { words: ["Мама", "готовит", "обед."], correct: "Мама готовит обед." },
+  { words: ["Птицы", "улетают", "на", "юг."], correct: "Птицы улетают на юг." },
+  { words: ["Мой", "друг", "читает", "книгу."], correct: "Мой друг читает книгу." },
+  { words: ["Мы", "учимся", "в", "четвёртом", "классе."], correct: "Мы учимся в четвёртом классе." },
+  { words: ["Бабушка", "испечёт", "вкусный", "пирог."], correct: "Бабушка испечёт вкусный пирог." },
+  { words: ["В", "лесу", "живут", "дикие", "животные."], correct: "В лесу живут дикие животные." },
+  { words: ["Дети", "любят", "играть", "в", "футбол."], correct: "Дети любят играть в футбол." },
+  { words: ["На", "небе", "светит", "яркое", "солнце."], correct: "На небе светит яркое солнце." },
+  { words: ["Я", "люблю", "свою", "Родину."], correct: "Я люблю свою Родину." }
+];
+
+let current = 0, correct = 0, wrong = 0, startTime = Date.now();
+let answer = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function render() {
+  if (current >= QUESTIONS.length) {
+    const time = Math.round((Date.now() - startTime) / 1000);
+    GAME_COMMON.showEndScreen(correct, wrong, time, 'soberi-predlozhenie', () => {
+      current = 0; correct = 0; wrong = 0; startTime = Date.now();
+      render();
+    });
+    return;
+  }
+  const q = QUESTIONS[current];
+  answer = [];
+  document.getElementById('current').textContent = current + 1;
+  document.getElementById('progress').style.width = (current / QUESTIONS.length * 100) + '%';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('checkBtn').disabled = true;
+  renderBuild();
+  renderPool(shuffle(q.words));
+}
+
+function renderBuild() {
+  const area = document.getElementById('buildArea');
+  area.innerHTML = '';
+  answer.forEach((word, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'word-btn in-answer';
+    btn.textContent = word;
+    btn.onclick = () => { answer.splice(idx, 1); renderBuild(); renderPool(); };
+    area.appendChild(btn);
+  });
+  document.getElementById('checkBtn').disabled = answer.length === 0;
+}
+
+function renderPool(words) {
+  const pool = document.getElementById('pool');
+  if (!words) {
+    const q = QUESTIONS[current];
+    words = shuffle(q.words);
+  }
+  pool.innerHTML = '';
+  words.forEach(word => {
+    if (answer.includes(word)) return;
+    const btn = document.createElement('button');
+    btn.className = 'word-btn';
+    btn.textContent = word;
+    btn.onclick = () => { answer.push(word); renderBuild(); renderPool(shuffle(QUESTIONS[current].words)); };
+    pool.appendChild(btn);
+  });
+}
+
+function check() {
+  const q = QUESTIONS[current];
+  const userAnswer = answer.join(' ');
+  const feedback = document.getElementById('feedback');
+  if (userAnswer === q.correct) {
+    correct++;
+    document.getElementById('score').textContent = correct;
+    feedback.textContent = '✅ Верно! Молодец!';
+    feedback.style.color = '#4CAF50';
+    setTimeout(() => { current++; render(); }, 1200);
+  } else {
+    wrong++;
+    feedback.textContent = `❌ Правильно: ${q.correct}`;
+    feedback.style.color = '#f44336';
+    setTimeout(() => { current++; render(); }, 2000);
+  }
+}
+
+render();
+</script>
+</body>
+</html>
