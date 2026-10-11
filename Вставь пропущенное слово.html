@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тексты с пропущенными словами</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: linear-gradient(135deg, #1F4E79, #2E6BA8); min-height: 100vh; padding: 20px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { color: #fff; text-align: center; margin-bottom: 30px; font-size: 36px; }
+  .text-card { background: #fff; border-radius: 20px; padding: 30px; margin-bottom: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .text-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 3px solid #ED7D31; padding-bottom: 12px; }
+  .text-title { font-size: 24px; color: #1F4E79; font-weight: bold; }
+  .text-module { background: #ED7D31; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 14px; }
+  .text-content { font-size: 20px; line-height: 2; color: #333; margin-bottom: 20px; }
+  .blank { display: inline-block; min-width: 100px; border-bottom: 3px solid #ED7D31; color: #ED7D31; font-weight: bold; text-align: center; padding: 0 8px; cursor: pointer; transition: 0.3s; }
+  .blank:hover { background: #FFF3E0; }
+  .blank.filled { color: #1F4E79; border-bottom-color: #4CAF50; background: #E8F5E9; }
+  .words-pool { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 12px; }
+  .word-btn { padding: 10px 18px; font-size: 18px; background: #1F4E79; color: #fff; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+  .word-btn:hover { background: #ED7D31; transform: scale(1.05); }
+  .word-btn.used { opacity: 0.3; cursor: not-allowed; }
+  .buttons { display: flex; gap: 12px; margin-top: 15px; }
+  .btn { padding: 12px 24px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+  .btn-check { background: #4CAF50; color: #fff; }
+  .btn-check:hover { background: #388E3C; }
+  .btn-reset { background: #f44336; color: #fff; }
+  .btn-reset:hover { background: #C62828; }
+  .feedback { text-align: center; font-size: 20px; font-weight: bold; margin-top: 15px; min-height: 30px; }
+  .criteria { margin-top: 20px; padding: 15px; background: #FFF8E1; border-left: 4px solid #ED7D31; border-radius: 8px; font-size: 14px; }
+  .criteria h4 { color: #1F4E79; margin-bottom: 8px; }
+  .criteria ul { margin-left: 20px; }
+  .criteria li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📝 Тексты с пропущенными словами</h1>
+  <div id="textsContainer"></div>
+</div>
+
+<script>
+const TEXTS = [
+  {
+    id: 1,
+    title: "Моя семья",
+    module: "Модуль 1. Диагностика",
+    text: "У меня есть дружная {0}. Папа {1} на заводе. Мама {2} вкусный обед. Брат Айдын {3} книгу. А сестра Алия {4} с кошкой. Мы {5} друг друга.",
+    words: ["семья", "работает", "готовит", "читает", "играет", "любим"]
+  },
+  {
+    id: 2,
+    title: "Моя школа",
+    module: "Модуль 4. Слова",
+    text: "Наша {0} большая и светлая. В классе стоят {1} парты. Ученики {2} в тетрадях. Учитель {3} интересную книгу. Дети внимательно {4} урок. Мы {5} свою школу.",
+    words: ["школа", "светлые", "пишут", "читает", "слушают", "любим"]
+  },
+  {
+    id: 3,
+    title: "Осень в Казахстане",
+    module: "Модуль 2. Звуки и буквы",
+    text: "Наступила золотая {0}. Яркое {1} светит на небе. Жёлтые {2} летят по дорожкам. Птицы {3} в тёплые края. В лесу стало {4}. Природа готовится к долгому зимнему {5}.",
+    words: ["осень", "солнце", "листья", "улетают", "тихо", "сну"]
+  },
+  {
+    id: 4,
+    title: "Наша Родина",
+    module: "Модуль 3. Заглавная буква",
+    text: "Казахстан — наша большая и {0} страна. Столица нашей Родины — красивый город {1}. Здесь живут {2} люди. Широкие {3} и высокие {4} украшают наш край. Мы очень {5} свою прекрасную землю.",
+    words: ["родная", "Астана", "трудолюбивые", "степи", "горы", "любим"]
+  },
+  {
+    id: 5,
+    title: "Батыр Райымбек",
+    module: "Модуль 5. Предложение",
+    text: "Войско возвращалось из дальнего {0}. Воины {1} и хотели пить. Вокруг была сухая {2}. Тогда батыр Райымбек ударил {3} в землю. Из земли забил чистый {4}. Воины утолили {5}. С тех пор родник называют именем {6}.",
+    words: ["похода", "устали", "степь", "копьём", "родник", "жажду", "батыра"]
+  },
+  {
+    id: 6,
+    title: "Помоги природе",
+    module: "Модуль 6. Текст",
+    text: "Природа — наш {0}. Мы должны её {1}. Нельзя ломать {2} и разорять гнёзда. Нельзя бросать {3} в реки. Нужно {4} деревья и цветы. Нужно помогать {5} и животным зимой. Если каждый из нас будет беречь природу, наша земля станет {6} и красивее.",
+    words: ["дом", "беречь", "деревья", "мусор", "сажать", "птицам", "чище"]
+  },
+  {
+    id: 7,
+    title: "Город будущего",
+    module: "Модуль 7. Итог",
+    text: "Каким будет {0} будущего? На улицах будут ездить {1} машины. Дома будут управлять {2} и теплом. {3} будут помогать людям. Но самое главное — в городе будущего будут жить {4} и честные люди. Они будут {5} природу и помогать друг другу. Будущее в руках {6}.",
+    words: ["город", "умные", "светом", "Роботы", "добрые", "беречь", "человека"]
+  },
+  {
+    id: 8,
+    title: "Приключения на каникулах",
+    module: "Модуль 7. Итог",
+    text: "Летом Алька {0} у бабушки. Однажды он пошёл к {1} и увидел бухту. В бухте {2} дельфины. Алька {3} и поплыл к ним. Дельфины не {4} мальчика. Они {5} с ним весь день. Алька понял, что животные понимают {6}. Это было настоящее {7}!",
+    words: ["гостил", "морю", "плавали", "нырнул", "испугались", "играли", "доброту", "приключение"]
+  }
+];
+
+function renderTexts() {
+  const container = document.getElementById('textsContainer');
+  container.innerHTML = '';
+  TEXTS.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'text-card';
+    card.innerHTML = `
+      <div class="text-header">
+        <div class="text-title">${t.id}. ${t.title}</div>
+        <div class="text-module">${t.module}</div>
+      </div>
+      <div class="text-content" id="text-${t.id}"></div>
+      <div class="words-pool" id="pool-${t.id}"></div>
+      <div class="buttons">
+        <button class="btn btn-check" onclick="checkText(${t.id})">Проверить</button>
+        <button class="btn btn-reset" onclick="resetText(${t.id})">Сбросить</button>
+      </div>
+      <div class="feedback" id="feedback-${t.id}"></div>
+      <div class="criteria">
+        <h4>Критерии оценивания:</h4>
+        <ul>
+          <li>Вставка слов (3 балла)</li>
+          <li>Грамотность записи (4 балла)</li>
+          <li>Каллиграфия (1 балл)</li>
+          <li><b>Итого: 8 баллов</b></li>
+        </ul>
+      </div>
+    `;
+    container.appendChild(card);
+    renderTextContent(t.id);
+    renderPool(t.id);
+  });
+}
+
+function renderTextContent(id) {
+  const t = TEXTS.find(x => x.id === id);
+  const el = document.getElementById('text-' + id);
+  let html = t.text;
+  for (let i = 0; i < t.words.length; i++) {
+    html = html.replace(`{${i}}`, `<span class="blank" id="blank-${id}-${i}" onclick="removeWord(${id}, ${i})">?</span>`);
+  }
+  el.innerHTML = html;
+}
+
+function renderPool(id) {
+  const t = TEXTS.find(x => x.id === id);
+  const pool = document.getElementById('pool-' + id);
+  pool.innerHTML = '';
+  const filled = getFilled(id);
+  const shuffled = shuffle([...t.words]);
+  shuffled.forEach(word => {
+    const btn = document.createElement('button');
+    btn.className = 'word-btn';
+    btn.textContent = word;
+    if (filled.includes(word)) btn.classList.add('used');
+    btn.onclick = () => addWord(id, word);
+    pool.appendChild(btn);
+  });
+}
+
+function getFilled(id) {
+  const t = TEXTS.find(x => x.id === id);
+  const filled = [];
+  for (let i = 0; i < t.words.length; i++) {
+    const blank = document.getElementById(`blank-${id}-${i}`);
+    if (blank && blank.classList.contains('filled')) {
+      filled.push(blank.textContent);
+    }
+  }
+  return filled;
+}
+
+function addWord(id, word) {
+  const t = TEXTS.find(x => x.id === id);
+  const filled = getFilled(id);
+  if (filled.includes(word)) return;
+  // Находим первый пустой пропуск
+  for (let i = 0; i < t.words.length; i++) {
+    const blank = document.getElementById(`blank-${id}-${i}`);
+    if (blank && !blank.classList.contains('filled')) {
+      blank.textContent = word;
+      blank.classList.add('filled');
+      blank.dataset.correct = word === t.words[i] ? 'true' : 'false';
+      break;
+    }
+  }
+  renderPool(id);
+}
+
+function removeWord(id, idx) {
+  const blank = document.getElementById(`blank-${id}-${idx}`);
+  if (!blank) return;
+  blank.textContent = '?';
+  blank.classList.remove('filled');
+  blank.dataset.correct = '';
+  renderPool(id);
+}
+
+function checkText(id) {
+  const t = TEXTS.find(x => x.id === id);
+  let correctCount = 0;
+  let emptyCount = 0;
+  for (let i = 0; i < t.words.length; i++) {
+    const blank = document.getElementById(`blank-${id}-${i}`);
+    if (!blank.classList.contains('filled')) {
+      emptyCount++;
+    } else if (blank.dataset.correct === 'true') {
+      correctCount++;
+    }
+  }
+  const feedback = document.getElementById('feedback-' + id);
+  if (emptyCount > 0) {
+    feedback.textContent = `⚠️ Заполни все пропуски (осталось ${emptyCount})`;
+    feedback.style.color = '#FF9800';
+    return;
+  }
+  if (correctCount === t.words.length) {
+    feedback.textContent = `✅ Все слова верно! Молодец! (${correctCount}/${t.words.length})`;
+    feedback.style.color = '#4CAF50';
+  } else {
+    feedback.textContent = `📊 Правильно: ${correctCount} из ${t.words.length}. Попробуй ещё!`;
+    feedback.style.color = '#FF9800';
+  }
+}
+
+function resetText(id) {
+  const t = TEXTS.find(x => x.id === id);
+  for (let i = 0; i < t.words.length; i++) {
+    const blank = document.getElementById(`blank-${id}-${i}`);
+    if (blank) {
+      blank.textContent = '?';
+      blank.classList.remove('filled');
+      blank.dataset.correct = '';
+    }
+  }
+  document.getElementById('feedback-' + id).textContent = '';
+  renderPool(id);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+renderTexts();
+</script>
+</body>
+</html>
