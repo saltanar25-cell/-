@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Игра 1. Родные просторы</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #74b9ff, #a29bfe);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #2d3436;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 620px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 26px;
+    color: #2d3436;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .sub {
+    color: #636e72;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: #dfe6e9;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 20px 0 10px 0;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0984e3, #00b894);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+  }
+
+  .question-box {
+    font-size: 20px;
+    color: #2d3436;
+    margin: 15px 0 20px 0;
+    text-align: center;
+    min-height: 70px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 16px;
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.4;
+  }
+
+  .question-box b {
+    color: #0984e3;
+    border-bottom: 2px dashed #0984e3;
+    padding: 0 8px;
+    margin: 0 4px;
+  }
+
+  .options {
+    display: grid;
+    gap: 12px;
+  }
+
+  .options button {
+    padding: 16px 20px;
+    font-size: 17px;
+    font-weight: 500;
+    border: 2px solid #dfe6e9;
+    background: #ffffff;
+    color: #2d3436;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .options button:hover:not(:disabled) {
+    background: #f1f2f6;
+    border-color: #b2bec3;
+    transform: translateY(-2px);
+  }
+
+  .options button.correct {
+    background: #00b894;
+    color: #ffffff;
+    border-color: #00b894;
+    animation: pulse 0.4s ease;
+  }
+
+  .options button.wrong {
+    background: #d63031;
+    color: #ffffff;
+    border-color: #d63031;
+    animation: shake 0.4s ease;
+  }
+
+  .explanation {
+    margin-top: 15px;
+    padding: 12px 16px;
+    background: #eccc681a;
+    border-left: 4px solid #ffa502;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #57606f;
+    display: none;
+    line-height: 1.4;
+  }
+
+  .info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #636e72;
+    padding-top: 15px;
+    border-top: 1px solid #f1f2f6;
+  }
+
+  .info span b {
+    color: #0984e3;
+  }
+
+  .final {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .final h2 {
+    font-size: 28px;
+    color: #2d3436;
+    margin-bottom: 10px;
+  }
+
+  .final p {
+    font-size: 18px;
+    color: #636e72;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    font-size: 72px;
+    margin: 10px 0 20px 0;
+    animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .btn-restart {
+    padding: 14px 28px;
+    background: #0984e3;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 15px rgba(9, 132, 227, 0.3);
+  }
+
+  .btn-restart:hover {
+    background: #0773c5;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px rgba(9, 132, 227, 0.4);
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>🔤 Родные просторы</h1>
+    <div class="sub">Раздел I. Заглавная буква и словарные слова</div>
+  </div>
+
+  <div id="quiz">
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="question-box" id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"></div>
+
+    <div class="info">
+      <span>Вопрос: <b id="current">1</b>/<span id="total">8</span></span>
+      <span>Баллы: <b id="score">0</b></span>
+    </div>
+  </div>
+
+  <div id="final" class="final" style="display:none">
+    <div class="badge" id="badge">🏆</div>
+    <h2 id="finalTitle">Результат</h2>
+    <p id="finalText"></p>
+    <button class="btn-restart" onclick="location.reload()">Пройти снова</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: 'Наша ___ — Казахстан.',
+    options: ['родина', 'Родина', 'родины'],
+    correct: 1,
+    rule: 'Слово «Родина» пишется с заглавной буквы, когда речь идет об Отечестве, родной стране.'
+  },
+  {
+    q: 'В озеро ___ впадает река Иле.',
+    options: ['балкаш', 'Балкаш', 'балкаши'],
+    correct: 1,
+    rule: 'Названия озер, рек, городов и другие географические названия пишутся с заглавной буквы.'
+  },
+  {
+    q: 'Красива ___ степь!',
+    options: ['родная', 'Родная', 'родной'],
+    correct: 0,
+    rule: 'Имена прилагательные (нарицательные) в середине предложения пишутся со строчной буквы.'
+  },
+  {
+    q: 'В горах растёт ___ ель.',
+    options: ['тянь-шаньская', 'Тянь-шаньская', 'тянь-Шаньская'],
+    correct: 0,
+    rule: 'Прилагательные, образованные от географических названий, пишутся со строчной буквы (тянь-шаньская).'
+  },
+  {
+    q: 'С горы виден весь ___.',
+    options: ['Город', 'горот', 'город'],
+    correct: 2,
+    rule: 'Слово «город» пишется со строчной буквы; парная согласная «д» на конце проверяется словом «города».'
+  },
+  {
+    q: '___ — столица Казахстана.',
+    options: ['астана', 'Астана', 'астаны'],
+    correct: 1,
+    rule: 'Первое слово в предложении и географические названия пишутся с заглавной буквы.'
+  },
+  {
+    q: 'Мы видели ___ озеро.',
+    options: ['голубое', 'голубой', 'голубая'],
+    correct: 0,
+    rule: 'Прилагательное согласуется с существительным «озеро» в среднем роде: озеро (какое?) голубое.'
+  },
+  {
+    q: 'Абай вернулся в родную ___.',
+    options: ['степ', 'степь', 'степи'],
+    correct: 1,
+    rule: 'Существительное 3-го склонения «степь» на конце содержит мягкий знак (ь).'
+  }
+];
+
+let current = 0;
+let score = 0;
+
+document.getElementById('total').textContent = questions.length;
+
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('question').innerHTML = q.q.replace('___', '<b>___</b>');
+  
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'none';
+  exp.textContent = '';
+
+  const progressPercent = (current / questions.length) * 100;
+  document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(i, btn);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('current').textContent = current + 1;
+}
+
+function checkAnswer(i, btn) {
+  const q = questions[current];
+  const buttons = document.querySelectorAll('#options button');
+  buttons.forEach(b => b.disabled = true);
+
+  const exp = document.getElementById('explanation');
+  exp.textContent = `💡 Правило: ${q.rule}`;
+  exp.style.display = 'block';
+
+  if (i === q.correct) {
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('score').textContent = score;
+  } else {
+    btn.classList.add('wrong');
+    buttons[q.correct].classList.add('correct');
+  }
+
+  setTimeout(() => {
+    current++;
+    if (current < questions.length) {
+      showQuestion();
+    } else {
+      showFinal();
+    }
+  }, 2200);
+}
+
+function showFinal() {
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('final').style.display = 'block';
+
+  const percent = Math.round((score / questions.length) * 100);
+  let badge = '🥉';
+  let title = 'Хорошо!';
+  
+  if (percent >= 80) {
+    badge = '🥈';
+    title = 'Отлично!';
+  }
+  if (percent === 100) {
+    badge = '🥇';
+    title = 'Мастер грамотности!';
+  }
+
+  document.getElementById('badge').textContent = badge;
+  document.getElementById('finalTitle').textContent = title;
+  document.getElementById('finalText').textContent = `Ваш результат: ${score} из ${questions.length} (${percent}%)`;
+
+  localStorage.setItem('igra-1-rodina', JSON.stringify({
+    score,
+    total: questions.length,
+    percent,
+    date: new Date().toISOString()
+  }));
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
